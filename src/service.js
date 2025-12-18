@@ -12,7 +12,7 @@ const {
     AI_COMMENT_RESPONSE_MQ
 } = require('./configs/mq.js');
 
-const FILE_SERVICE_URL = 'http://localhost:3004/files/upload';
+const FILE_SERVICE_URL = 'https://dha-soa-file-2.onrender.com/files/upload';
 const DB_USER_INFOR_SYNC_MQ = "soa_user_infor";
 
 class Service {
