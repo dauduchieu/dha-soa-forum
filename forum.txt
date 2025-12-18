@@ -1,0 +1,289 @@
+[ALL]
+POST: /forum/posts
+Authorization: "Bearer token"
+request: {
+    "title": "string",
+    "content": "string",
+    "files": "file:blob"
+}
+response: {
+    "post_id": "id"
+}
+STATUS_CODE:
+- Success: 201 CREATED
+- Errors:
+  - 400 Bad Request (missing title/content)
+  - 401 Unauthorized (invalid token)
+  - 413 Payload Too Large (file too big)
+  - 500 Internal Server Error
+  - 502 Error uploading files to storage
+
+---
+
+[ALL]
+GET: /forum/posts?q=...
+params: {
+    "search": "string", # search="title"
+    "page": "int", # page=1
+    "filter": "string", # filter=role:ALL, role:ADMIN, role:MEMBER
+    "sort": "string", # time, trend
+}
+response: {
+    "posts": [{
+        "post_id": "id",
+        "title": "string",
+        "create_at": "string",
+        "view_count": "int",
+        "comment_count": "int",
+        "user": {
+            "username": "string",
+            "fullname": "string",
+            "avatar_image_link": "string",
+	“role”: “string”
+        }
+    }],
+    "meta": {
+   "total_items": 120,
+   "page_size": 10,
+   "current_page": 2,
+   "total_pages": 12
+ }
+
+}
+STATUS_CODE:
+- Success: 200 OK
+- Errors:
+  - 400 Bad Request (invalid query params)
+  - 500 Internal Server Error
+
+---
+
+[ALL]
+GET: /forum/posts/:post_id
+response: {
+    "post_id": "id",
+    "title": "string",
+    "content": "string",
+    “file_paths”: [“string”]
+    "create_at": "string",
+    "view_count": "int",
+    "comment_count": "int",
+    "user": {
+        "username": "string",
+        "fullname": "string",
+        "avatar_image_link": "string",
+        “role”: “string”
+    }
+}
+STATUS_CODE:
+- Success: 200 OK
+- Errors:
+  - 404 Not Found (post not exist)
+  - 500 Internal Server Error
+
+---
+
+[ALL]
+PUT: /forum/posts/:post_id
+Authorization: "Bearer token"
+request: {
+    "title": "string",
+    "content": "string"
+    "new_files": "file:blob",
+    "old_file_paths": ["string"]
+}
+-> GET: [“anh1.png”, “anh2.jpg”]
+-> PUT: [“anh2.jpg”], new_files -> files -> [“nf1”]
+-> DB: 
+
+
+response: {
+    "post_id": "id",
+    "title": "string",
+    "content": "string",
+    “file_paths”: [“string”],
+    "create_at": "string",
+    "view_count": "int",
+    "comment_count": "int",
+    "user": {
+        "username": "string",
+        "fullname": "string",
+        "avatar_image_link": "string",
+        “role”: “string”
+    }
+}
+STATUS_CODE:
+- Success: 200 OK
+- Errors:
+  - 400 Bad Request
+  - 401 Unauthorized
+  - 403 Forbidden (not post owner)
+  - 404 Not Found
+  - 500 Internal Server Error
+
+---
+
+[ALL]
+DELETE: /forum/posts/:post_id
+Authorization: "Bearer token"
+response: ok
+STATUS_CODE:
+- Success: 200 OK
+- Errors:
+  - 401 Unauthorized
+  - 403 Forbidden
+  - 404 Not Found
+  - 500 Internal Server Error
+
+---
+
+[ALL]
+POST: /forum/posts/:post_id/comments
+Authorization: "Bearer token"
+request: {
+    "content": "string",
+    "parent_id": "null | id",
+    "files": "files:blob"
+}
+response: {
+    "comment_id": "id",
+    "content": "string",
+    "file_paths": ["string"],
+    “is_deleted”: “boolean”,
+    "create_at": "string",
+    "user": {
+        "username": "string",
+        "fullname": "string",
+        "avatar_image_link": "string",
+        “role”: “string”
+    },
+    "parent": {
+        "comment_id": "id",
+        "content": "string",
+        "file_paths": ["string"],
+        “is_deleted”: “boolean”,
+        "create_at": "string",
+        "user": {
+            "username": "string",
+            "fullname": "string",
+            "avatar_image_link": "string",
+	“role”: “string”
+        },
+    },
+}
+STATUS_CODE:
+- Success: 201 CREATED
+- Errors:
+  - 400 Bad Request
+  - 401 Unauthorized
+  - 404 Not Found (post not exist)
+  - 500 Internal Server Error
+
+---
+
+[ALL]
+GET: /forum/posts/:post_id/comments?page=1
+params: {
+    "page": "int" # page of comments
+}
+response: {
+    "comments": [{
+        "comment_id": "id",
+        "content": "string",
+        "file_paths": ["string"],
+        “is_deleted”: “boolean”,
+        "create_at": "string",
+        "user": {
+            "username": "string",
+            "fullname": "string",
+            "avatar_image_link": "string",
+	“role”: “string”
+        },
+        "parent": {
+            "comment_id": "id",
+            "content": "string",
+            "file_paths": ["string"],
+            “is_deleted”: “boolean”,
+            "create_at": "string",
+            "user": {
+                "username": "string",
+                "fullname": "string",
+                "avatar_image_link": "string",
+    “role”: “string”
+            },
+        },
+    }],
+    "meta": {
+   "total_items": 120,
+   "page_size": 10,
+   "current_page": 2,
+   "total_pages": 12
+    }
+}
+STATUS_CODE:
+- Success: 200 OK
+- Errors:
+  - 400 Bad Request
+  - 404 Not Found
+  - 500 Internal Server Error
+
+---
+
+[ALL]
+PUT: /forum/posts/:post_id/comments/:comment_id
+Authorization: "Bearer token"
+request: {
+    "content": "string",
+    "new_files": "files:blob",
+    "old_file_paths": ["string"]
+}
+response: {
+    "comment_id": "id",
+    "content": "string",
+    "file_paths": ["string"],
+    “is_deleted”: “boolean”,
+    "create_at": "string",
+    "user": {
+        "username": "string",
+        "fullname": "string",
+        "avatar_image_link": "string",
+	“role”: “string”
+    },
+    "parent": {
+        "comment_id": "id",
+        "content": "string",
+        "file_paths": ["string"],
+        “is_deleted”: “boolean”,
+        "create_at": "string",
+        "user": {
+            "username": "string",
+            "fullname": "string",
+            "avatar_image_link": "string",
+	“role”: “string”
+        },
+    },
+}
+STATUS_CODE:
+- Success: 200 OK
+- Errors:
+  - 400 Bad Request
+  - 401 Unauthorized
+  - 403 Forbidden (not comment owner)
+  - 404 Not Found
+  - 500 Internal Server Error
+
+---
+
+[ALL]
+DELETE: /forum/posts/:post_id/comments/:comment_id
+Authorization: "Bearer token"
+response: ok
+STATUS_CODE:
+- Success: 200 OK
+- Errors:
+  - 401 Unauthorized
+  - 403 Forbidden
+  - 404 Not Found
+  - 500 Internal Server Error
+
+
